@@ -15,7 +15,7 @@ KEY = os.getenv('TARKOV_KEY')
 
 headers = {'x-api-key': KEY}
 client = discord.Client()
-insult = ["idiot", "dummy", "stupid", "shithead"]
+insult = ["idiot", "dummy", "stupid", "shithead", "Tyler"]
 emoji = [":monkahmm:", ":monkaw:", ":notlikethis:", ":bttv_111:"]
 
 @client.event
@@ -23,14 +23,19 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if "!price" in message.content:
+    if  "!price" in message.content:
         list = message.content.split()
         mItem = itemgetter(1)(list)
-        try:
-            url = "https://tarkov-market.com/api/v1/item?q={}".format(mItem)
-            r = requests.get(url, headers=headers)
-            json_data = json.loads(r.text)
 
+        url = "https://tarkov-market.com/api/v1/item?q={}".format(mItem)
+        r = requests.get(url, headers=headers)
+        json_data = json.loads(r.text)
+        if len(r.text) < 4:
+            rInsult = random.choice(insult)
+            rEmoji = random.choice(emoji)
+            mes = "Item {} not found you {} {}".format(mItem, rInsult, rEmoji)
+            await message.channel.send(mes)
+        else:
             for item in json_data:
                 title = item['shortName']
                 price = item['avg24hPrice']
@@ -43,12 +48,6 @@ async def on_message(message):
                 embed.set_image(url="{}".format(img))
                 await message.channel.send(embed=embed)
 
-        except:
-            rInsult = random.choice(insult)
-	    rEmoji = random.choice(emoji)
-            mes = "Item {} not found you {}".format(mItem, rInsult, rEmoji)
-            await message.channel.send(mes)
-
     elif "!tarkohelp" in message.content:
         mes = "try !price 'item name' to get the price of an item"
         await message.channel.send(mes)
@@ -60,6 +59,5 @@ async def on_message(message):
     elif "!owen" in message.content:
         mes = "owen its one command please stop it please"
         await message.channel.send(mes)
-
 
 client.run(TOKEN)
